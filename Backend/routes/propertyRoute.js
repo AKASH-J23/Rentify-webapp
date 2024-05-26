@@ -16,11 +16,13 @@ router.get('/properties', async (req, res) => {
 // add property
 router.post('/properties', authMiddleWare, async (req, res) => {
   try {
-      const property = new Property({ ...req.body });
-      const response = await property.save();
-      return res.status(201).json({ message: response });
+    const userId = req.user.id;
+    const propertyData = { ...req.body, user: userId };
+    const property = new Property(propertyData);
+    const response = await property.save();
+    return res.status(201).json({ message: response });
   } catch (err) {
-      return res.status(404).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 });
 

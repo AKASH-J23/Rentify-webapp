@@ -1,62 +1,36 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CreatePropertyForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    address: {
-      street: "",
-      city: "",
-      state: "",
-      postal_code: "",
-      country: "",
-    },
+    address: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    country: "",
     property_type: "",
     bedrooms: "",
     bathrooms: "",
     square_feet: "",
     price_per_month: "",
     photos: [{ url: "", description: "" }],
-    landlord: {
-      name: "",
-      contact_number: "",
-      email: "",
-    },
-    nearby: [],
+    landlordname: "",
+    contact_number: "",
+    email: "",
+    nearby: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
-        ...prevData,
-        [name]: value
-    }));
-};
-
-const handleNearbyChange = (e, index, field) => {
-  const { value } = e.target;
-  setFormData((prevData) => {
-      const updatedNearby = [...prevData.nearby];
-      updatedNearby[index][field] = value;
-      return { ...prevData, nearby: updatedNearby };
-  });
-};
-
-const addNearby = () => {
-  setFormData((prevData) => ({
       ...prevData,
-      nearby: [...prevData.nearby, { place: '', distance: '' }]
-  }));
-};
-
-const removeNearby = (index) => {
-  setFormData((prevData) => {
-      const updatedNearby = [...prevData.nearby];
-      updatedNearby.splice(index, 1);
-      return { ...prevData, nearby: updatedNearby };
-  });
-};
-
+      [name]: value,
+    }));
+  };
 
   const handlePhotoChange = (e, index) => {
     const { value } = e.target;
@@ -82,10 +56,47 @@ const removeNearby = (index) => {
     });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+       // Retrieve user data from local storage
+    const userData = JSON.parse(localStorage.getItem("userData"));
+
+    // Ensure userData exists and contains required properties
+    if (!userData || !userData.token || !userData.user) {
+      console.error("User data not found in local storage.");
+      return;
+    }
+
+    // Merge user data into the formData
+    const formDataWithUser = {
+      ...formData,
+      user: userData.user._id, // Assuming user ID is stored in userData.user._id
+    };
+      const response = await axios.post(
+        "http://localhost:3000/prop/properties",
+        formDataWithUser,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        navigate("/");
+        console.log(response.data.message);
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-white p-8 rounded-md shadow-md">
-      <h2 className="text-2xl mb-4 font-bold">Create Property</h2>
-      <form>
+    <div className="bg-col1-700 p-4 w-full mx-auto my-10 rounded-lg max-w-3xl">
+      <form onSubmit={handleSubmit}
+        className="bg-col1-300 shadow-md rounded px-8 pt-6 pb-6">
         <div className="mb-4">
           <label htmlFor="title" className="block mb-2 font-semibold">
             Title
@@ -97,6 +108,7 @@ const removeNearby = (index) => {
             value={formData.title}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -110,6 +122,7 @@ const removeNearby = (index) => {
             onChange={handleChange}
             rows="4"
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -118,11 +131,12 @@ const removeNearby = (index) => {
           </label>
           <input
             type="text"
-            id="street"
-            name="address.street"
-            value={formData.address.street}
+            id="address"
+            name="address"
+            value={formData.address}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -132,10 +146,11 @@ const removeNearby = (index) => {
           <input
             type="text"
             id="city"
-            name="address.city"
-            value={formData.address.city}
+            name="city"
+            value={formData.city}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -145,10 +160,11 @@ const removeNearby = (index) => {
           <input
             type="text"
             id="state"
-            name="address.state"
-            value={formData.address.state}
+            name="state"
+            value={formData.state}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -158,10 +174,11 @@ const removeNearby = (index) => {
           <input
             type="text"
             id="postal_code"
-            name="address.postal_code"
-            value={formData.address.postal_code}
+            name="postal_code"
+            value={formData.postal_code}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -171,10 +188,11 @@ const removeNearby = (index) => {
           <input
             type="text"
             id="country"
-            name="address.country"
-            value={formData.address.country}
+            name="country"
+            value={formData.country}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
 
@@ -188,6 +206,7 @@ const removeNearby = (index) => {
             value={formData.property_type}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           >
             <option value="">Select Property Type</option>
             <option value="apartment">Apartment</option>
@@ -207,6 +226,7 @@ const removeNearby = (index) => {
             value={formData.bedrooms}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -220,6 +240,7 @@ const removeNearby = (index) => {
             value={formData.bathrooms}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -233,6 +254,7 @@ const removeNearby = (index) => {
             value={formData.square_feet}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
@@ -246,12 +268,10 @@ const removeNearby = (index) => {
             value={formData.price_per_month}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="photos" className="block mb-2 font-semibold">
-            Photos
-          </label>
           <div className="mb-4">
             <label htmlFor="photos" className="block mb-2 font-semibold">
               Photos
@@ -277,97 +297,74 @@ const removeNearby = (index) => {
             <button
               type="button"
               onClick={addPhoto}
-              className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300"
+              className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded"
             >
               Add Photo
             </button>
           </div>
         </div>
         <div className="mb-4">
-          <label htmlFor="landlord_name" className="block mb-2 font-semibold">
-            Landlord Name
+  <label htmlFor="landlord_name" className="block mb-2 font-semibold">
+    Landlord Name
+  </label>
+  <input
+    type="text"
+    id="landlord_name"
+    name="landlordname"
+    value={formData.landlordname}
+    onChange={handleChange}
+    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+    required
+  />
+</div>
+<div className="mb-4">
+  <label htmlFor="contact_number" className="block mb-2 font-semibold">
+    Contact Number
+  </label>
+  <input
+    type="tel"
+    id="contact_number"
+    name="contact_number"
+    value={formData.contact_number}
+    onChange={handleChange}
+    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+    required
+  />
+</div>
+<div className="mb-4">
+  <label htmlFor="email" className="block mb-2 font-semibold">
+    Email
+  </label>
+  <input
+    type="email"
+    id="email"
+    name="email"
+    value={formData.email}
+    onChange={handleChange}
+    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+    required
+  />
+</div>
+<div className="mb-4">
+          <label
+            htmlFor="nearby"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Nearby Places
           </label>
           <input
             type="text"
-            id="landlord_name"
-            name="landlord.name"
-            value={formData.landlord.name}
+            id="nearby"
+            name="nearby"
+            value={formData.nearby}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring focus:border-blue-300"
+            placeholder="Enter nearby places"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="contact_number" className="block mb-2 font-semibold">
-            Contact Number
-          </label>
-          <input
-            type="tel"
-            id="contact_number"
-            name="landlord.contact_number"
-            value={formData.landlord.contact_number}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block mb-2 font-semibold">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="landlord.email"
-            value={formData.landlord.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="nearby_places" className="block mb-2 font-semibold">
-            Nearby Places
-          </label>
-          <div className="mb-4">
-            <label htmlFor="nearby_places" className="block mb-2 font-semibold">
-              Nearby Places
-            </label>
-            {Object.entries(formData.nearby).map(([place, distance], index) => (
-              <div key={index} className="flex mb-2">
-                <input
-                  type="text"
-                  value={place}
-                  onChange={(e) => handleNearbyChange(e, index, "place")}
-                  placeholder="Place"
-                  className="w-1/2 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300 mr-2"
-                />
-                <input
-                  type="text"
-                  value={distance}
-                  onChange={(e) => handleNearbyChange(e, index, "distance")}
-                  placeholder="Distance"
-                  className="w-1/2 px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeNearby(index)}
-                  className="ml-2 text-red-500"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addNearby}
-              className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300"
-            >
-              Add Nearby Place
-            </button>
-          </div>
-        </div>
-
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300"
+          className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded"
         >
           Create Property
         </button>

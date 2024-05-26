@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fname: "",
+    lname: "",
     email: "",
-    phoneNumber: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -22,7 +25,7 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -31,12 +34,21 @@ function Register() {
     }
 
     setPasswordMatch(true);
+    const { confirmPassword, ...dataWithoutConfPassword } = formData;
 
-    console.log("Form submitted");
     try {
-      console.log(formData);
-    } catch (error) {
-      console.log(error);
+      const response = await axios.post(
+        "http://localhost:3000/user/user-register",
+        dataWithoutConfPassword
+      );
+      if (response.data.success === true) {
+        console.log("User Registration Successfull");
+        navigate("/login");
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (err) {
+      console.log("Something Went Wrong");
     }
   };
 
@@ -50,15 +62,15 @@ function Register() {
           <div className="mb-4">
             <label
               className="block text-black text-md font-bold mb-2"
-              htmlFor="firstName"
+              htmlFor="fname"
             >
               First Name
             </label>
             <input
               className="border rounded w-full py-2 px-3 text-black"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
+              id="fname"
+              name="fname"
+              value={formData.fname}
               onChange={handleInputChange}
               type="text"
               placeholder="First Name"
@@ -68,15 +80,15 @@ function Register() {
           <div className="mb-4">
             <label
               className="block text-black text-md font-bold mb-2"
-              htmlFor="lastName"
+              htmlFor="lname"
             >
               Last Name
             </label>
             <input
               className="border rounded w-full py-2 px-3 text-black"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
+              id="lname"
+              name="lname"
+              value={formData.lname}
               onChange={handleInputChange}
               type="text"
               placeholder="Last Name"
@@ -104,15 +116,15 @@ function Register() {
           <div className="mb-4">
             <label
               className="block text-black text-md font-bold mb-2"
-              htmlFor="phoneNumber"
+              htmlFor="phone"
             >
               Phone Number
             </label>
             <input
               className="border rounded w-full py-2 px-3 text-black"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
+              id="phone"
+              name="phone"
+              value={formData.phone}
               onChange={handleInputChange}
               type="tel"
               placeholder="Phone Number"
