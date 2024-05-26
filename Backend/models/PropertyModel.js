@@ -1,23 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const NearbySchema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  distance: {
-    type: String,
-    required: true
-  }
-});
-
 const PropertySchema = new Schema({
-  property_id: {
-    type: String,
-    required: true,
-    unique: true
-  },
   title: {
     type: String,
     required: true
@@ -65,10 +49,10 @@ const PropertySchema = new Schema({
     email: { type: String, required: true }
   },
   nearby: {
-    colleges: [NearbySchema],
-    hospitals: [NearbySchema],
-    shopping_centers: [NearbySchema],
-    parks: [NearbySchema]
+    type: Map,
+    of: String,
+    required: false,
+    default: {}
   },
   user: {
     type: Schema.Types.ObjectId,
